@@ -14,7 +14,7 @@
         <div v-if="showColorPicker" class="color-picker-overlay">
             <div class="color-picker-modal">
                 <div>Wähle eine Farbe:</div>
-                <div style="display:flex; flex-direction:column; gap:18px; align-items:center;">
+                <div class="color-picker-grid">
                     <button v-for="color in ['red','green','blue','yellow']" :key="color" :class="['card', color]"
                         @click="chooseColor(color)"></button>
                 </div>

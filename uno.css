@@ -334,8 +334,17 @@ body {
     margin-bottom: 24px;
     text-shadow: 0 2px 8px #000a;
 }
+.color-picker-modal .color-picker-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 32px 32px;
+    justify-items: center;
+    align-items: center;
+    margin-top: 18px;
+}
 .color-picker-modal .card {
-    margin: 12px 0;
+    margin: 0;
     min-width: 70px;
     min-height: 100px;
     font-size: 2em;
