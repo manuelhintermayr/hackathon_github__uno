@@ -217,10 +217,10 @@
                         }
                         // Nach Ziehen: Wenn Karte gelegt wird, Zugwechsel
                         if (this.hasDrawn) {
-                          this.hasDrawn = false;
-                          this.nextPlayer();
+                            this.hasDrawn = false;
+                            this.nextPlayer();
                         } else {
-                          this.nextPlayer();
+                            this.nextPlayer();
                         }
                     } else {
                         this.errorMsg = 'Diese Karte kann nicht gelegt werden!';
@@ -248,11 +248,11 @@
                     this.currentPlayer = 1 - this.currentPlayer;
                 },
                 passen() {
-                  // Spieler kann passen, wenn er nach Ziehen nicht legen kann/will
-                  if (this.hasDrawn) {
-                    this.hasDrawn = false;
-                    this.nextPlayer();
-                  }
+                    // Spieler kann passen, wenn er nach Ziehen nicht legen kann/will
+                    if (this.hasDrawn) {
+                        this.hasDrawn = false;
+                        this.nextPlayer();
+                    }
                 }
             },
             mounted() {
