@@ -22,6 +22,7 @@
         </div>
         <div class="uno-action-buttons">
             <button v-if="getPlayerIndex(0)===currentPlayer" @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
+            <button v-if="getPlayerIndex(0)===currentPlayer && hasDrawn" @click="passen">Passen</button>
             <button @click="confirmNewGame">Neues Spiel</button>
         </div>
         <div class="uno-table-modern" :style="showColorPicker ? 'filter:blur(2px);pointer-events:none;' : ''">
