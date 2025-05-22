@@ -21,8 +21,18 @@ createApp({
                     deck.push({ color, value: n });
                     if (n !== 0) deck.push({ color, value: n }); // 2x jede Zahl außer 0
                 }
+                // 2x Skip, 2x Reverse, 2x +2 pro Farbe
+                for (let i = 0; i < 2; i++) {
+                    deck.push({ color, value: 'S' }); // Skip
+                    deck.push({ color, value: 'R' }); // Reverse
+                    deck.push({ color, value: '+2' }); // Draw Two
+                }
             }
-            // Optional: Spezialkarten (ausgelassen für Einfachheit)
+            // 4x Wild, 4x +4 (farblos)
+            for (let i = 0; i < 4; i++) {
+                deck.push({ color: 'wild', value: 'W' }); // Wild
+                deck.push({ color: 'wild', value: '+4' }); // Wild Draw Four
+            }
             return this.shuffle(deck);
         },
         shuffle(arr) {
@@ -55,33 +65,76 @@ createApp({
             const hand = this.hands[this.currentPlayer];
             const card = hand[idx];
             const top = this.discardPile[this.discardPile.length - 1];
-            if (card.color === top.color || card.value === top.value) {
+            // Legeregeln für Wild-Karten
+            const isPlayable = (
+                card.color === top.color ||
+                card.value === top.value ||
+                card.color === 'wild'
+            );
+            if (isPlayable) {
                 this.discardPile.push(card);
                 hand.splice(idx, 1);
+                // Wild-Karten: Farbe wählen (hier: zufällig, UI-Auswahl kann später ergänzt werden)
+                if (card.color === 'wild' && card.value === 'W') {
+                    const colors = ['red', 'green', 'blue', 'yellow'];
+                    const chosen = colors[Math.floor(Math.random() * 4)];
+                    this.discardPile[this.discardPile.length - 1].color = chosen;
+                }
+                if (card.color === 'wild' && card.value === '+4') {
+                    const colors = ['red', 'green', 'blue', 'yellow'];
+                    const chosen = colors[Math.floor(Math.random() * 4)];
+                    this.discardPile[this.discardPile.length - 1].color = chosen;
+                    // Nächster Spieler zieht 4 Karten und setzt aus
+                    this.nextPlayer();
+                    for (let i = 0; i < 4; i++) {
+                        if (this.deck.length === 0) this.reshuffleDeck();
+                        this.hands[this.currentPlayer].push(this.deck.pop());
+                    }
+                    this.nextPlayer();
+                } else if (card.value === '+2') {
+                    // Nächster Spieler zieht 2 Karten und setzt aus
+                    this.nextPlayer();
+                    for (let i = 0; i < 2; i++) {
+                        if (this.deck.length === 0) this.reshuffleDeck();
+                        this.hands[this.currentPlayer].push(this.deck.pop());
+                    }
+                    this.nextPlayer();
+                } else if (card.value === 'S' || card.value === 'R') {
+                    // Bei 2 Spielern: Skip und Reverse wirken wie Skip
+                    this.nextPlayer();
+                    this.nextPlayer();
+                } else {
+                    if (hand.length === 0) {
+                        this.winner = this.currentPlayer;
+                        return;
+                    }
+                    // Nach Ziehen: Wenn Karte gelegt wird, Zugwechsel
+                    if (this.hasDrawn) {
+                        this.hasDrawn = false;
+                        this.nextPlayer();
+                    } else {
+                        this.nextPlayer();
+                    }
+                }
                 if (hand.length === 0) {
                     this.winner = this.currentPlayer;
                     return;
                 }
-                // Nach Ziehen: Wenn Karte gelegt wird, Zugwechsel
-                if (this.hasDrawn) {
-                    this.hasDrawn = false;
-                    this.nextPlayer();
-                } else {
-                    this.nextPlayer();
-                }
             } else {
                 this.errorMsg = 'Diese Karte kann nicht gelegt werden!';
             }
+        },
+        reshuffleDeck() {
+            const last = this.discardPile.pop();
+            this.deck = this.shuffle(this.discardPile);
+            this.discardPile = [last];
         },
         drawCard() {
             if (this.winner !== null) return;
             if (!this.canDraw) return;
             if (this.hasDrawn) return; // Nur 1x ziehen pro Zug
             if (this.deck.length === 0) {
-                // Mische Ablagestapel zurück
-                const last = this.discardPile.pop();
-                this.deck = this.shuffle(this.discardPile);
-                this.discardPile = [last];
+                this.reshuffleDeck();
             }
             this.hands[this.currentPlayer].push(this.deck.pop());
             this.canDraw = false;
