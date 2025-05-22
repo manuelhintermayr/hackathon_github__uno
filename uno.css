@@ -144,9 +144,21 @@ button:disabled {
     margin: 10px 0 30px 0;
 }
 
+@media (max-width: 1200px) {
+    .uno-table-4 { font-size: 0.7em; }
+    .side-player { min-width: 40px; }
+    .card { width: 44px; height: 66px; font-size: 1.2em; }
+    .current-color-indicator { width: 22px; height: 22px; }
+}
 @media (max-width: 900px) {
     .uno-table-4 { font-size: 0.8em; }
     .side-player { min-width: 60px; }
+}
+@media (max-width: 800px) {
+    .uno-table-4 { font-size: 0.55em; }
+    .side-player { min-width: 24px; }
+    .card { width: 32px; height: 48px; font-size: 0.9em; }
+    .current-color-indicator { width: 14px; height: 14px; }
 }
 
 .player-label.active {
@@ -160,14 +172,7 @@ button:disabled {
 }
 
 .card-count {
-    position: absolute;
-    bottom: 2px;
-    right: 6px;
-    font-size: 0.8em;
-    color: #ffd600;
-    background: #222a;
-    border-radius: 6px;
-    padding: 0 4px;
+    display: none;
 }
 
 .current-color-indicator {

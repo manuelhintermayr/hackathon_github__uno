@@ -45,26 +45,28 @@
         </div>
         <div class="uno-table-4" :style="showColorPicker ? 'filter:blur(2px);pointer-events:none;' : ''">
             <div class="uno-row top-row">
-                <div class="player-label" :class="{active: currentPlayer===1}">Spieler 2 <span v-if="currentPlayer===1">(am Zug)</span></div>
+                <div class="player-label" :class="{active: currentPlayer===1}">
+                    Spieler 2 <span v-if="currentPlayer===1">(am Zug)</span>
+                    <span style="font-size:0.9em; color:#ffd600; margin-left:8px;">({{ hands[1].length }} Karten)</span>
+                </div>
                 <div class="hand hand-row" v-if="currentPlayer===1">
                     <div v-for="(card, idx) in hands[1]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                 </div>
                 <div class="hand hand-row" v-else>
-                    <div v-for="card in hands[1]" class="card back" style="position:relative;">
-                        <span class="card-count">{{ hands[1].length }}</span>
-                    </div>
+                    <div v-for="card in hands[1]" class="card back"></div>
                 </div>
             </div>
             <div class="uno-row middle-row">
                 <div class="side-player">
-                    <div class="player-label" :class="{active: currentPlayer===2}">Spieler 3 <span v-if="currentPlayer===2">(am Zug)</span></div>
+                    <div class="player-label" :class="{active: currentPlayer===2}">
+                        Spieler 3 <span v-if="currentPlayer===2">(am Zug)</span>
+                        <span style="font-size:0.9em; color:#ffd600; margin-left:8px;">({{ hands[2].length }} Karten)</span>
+                    </div>
                     <div class="hand hand-col" v-if="currentPlayer===2">
                         <div v-for="(card, idx) in hands[2]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                     </div>
                     <div class="hand hand-col" v-else>
-                        <div v-for="card in hands[2]" class="card back" style="position:relative;">
-                            <span class="card-count">{{ hands[2].length }}</span>
-                        </div>
+                        <div v-for="card in hands[2]" class="card back"></div>
                     </div>
                 </div>
                 <div class="center-stacks">
@@ -91,26 +93,28 @@
                     <div v-if="errorMsg" style="color:#ff5252; font-weight:bold; margin-bottom:10px;">{{ errorMsg }}</div>
                 </div>
                 <div class="side-player">
-                    <div class="player-label" :class="{active: currentPlayer===3}">Spieler 4 <span v-if="currentPlayer===3">(am Zug)</span></div>
+                    <div class="player-label" :class="{active: currentPlayer===3}">
+                        Spieler 4 <span v-if="currentPlayer===3">(am Zug)</span>
+                        <span style="font-size:0.9em; color:#ffd600; margin-left:8px;">({{ hands[3].length }} Karten)</span>
+                    </div>
                     <div class="hand hand-col" v-if="currentPlayer===3">
                         <div v-for="(card, idx) in hands[3]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                     </div>
                     <div class="hand hand-col" v-else>
-                        <div v-for="card in hands[3]" class="card back" style="position:relative;">
-                            <span class="card-count">{{ hands[3].length }}</span>
-                        </div>
+                        <div v-for="card in hands[3]" class="card back"></div>
                     </div>
                 </div>
             </div>
             <div class="uno-row bottom-row">
-                <div class="player-label" :class="{active: currentPlayer===0}">Spieler 1 <span v-if="currentPlayer===0">(am Zug)</span></div>
+                <div class="player-label" :class="{active: currentPlayer===0}">
+                    Spieler 1 <span v-if="currentPlayer===0">(am Zug)</span>
+                    <span style="font-size:0.9em; color:#ffd600; margin-left:8px;">({{ hands[0].length }} Karten)</span>
+                </div>
                 <div class="hand hand-row" v-if="currentPlayer===0">
                     <div v-for="(card, idx) in hands[0]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                 </div>
                 <div class="hand hand-row" v-else>
-                    <div v-for="card in hands[0]" class="card back" style="position:relative;">
-                        <span class="card-count">{{ hands[0].length }}</span>
-                    </div>
+                    <div v-for="card in hands[0]" class="card back"></div>
                 </div>
             </div>
         </div>
