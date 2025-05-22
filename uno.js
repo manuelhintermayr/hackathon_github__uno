@@ -16,6 +16,7 @@ createApp({
             currentColor: null,
             showNextPlayerMsg: false,
             playerPerspective: 0, // 0 = Spieler 1, 1 = Spieler 2, ...
+            waitingForNextPlayer: false,
         };
     },
     methods: {
@@ -69,9 +70,10 @@ createApp({
             // Setze Startfarbe
             this.currentColor = this.discardPile[0].color;
             this.showNextPlayerMsg = false;
+            this.waitingForNextPlayer = false;
         },
         playCard(idx) {
-            if (this.winner !== null) return;
+            if (this.winner !== null || this.waitingForNextPlayer) return;
             this.errorMsg = '';
             const hand = this.hands[this.currentPlayer];
             const card = hand[idx];
@@ -176,17 +178,18 @@ createApp({
             this.discardPile = [last];
         },
         drawCard() {
-            if (this.winner !== null) return;
-            if (!this.canDraw) return;
-            if (this.hasDrawn) return; // Nur 1x ziehen pro Zug
-            if (this.deck.length === 0) {
-                this.reshuffleDeck();
+            if (this.winner !== null || this.waitingForNextPlayer) return;
+            if (this.canDraw) {
+                if (this.hasDrawn) return; // Nur 1x ziehen pro Zug
+                if (this.deck.length === 0) {
+                    this.reshuffleDeck();
+                }
+                this.hands[this.currentPlayer].push(this.deck.pop());
+                this.canDraw = false;
+                this.hasDrawn = true;
+                this.errorMsg = '';
+                setTimeout(() => { this.canDraw = true; }, 500);
             }
-            this.hands[this.currentPlayer].push(this.deck.pop());
-            this.canDraw = false;
-            this.hasDrawn = true;
-            this.errorMsg = '';
-            setTimeout(() => { this.canDraw = true; }, 500);
         },
         nextPlayer(skip = false) {
             this.hasDrawn = false;
@@ -198,11 +201,14 @@ createApp({
             }
             this.playerPerspective = this.currentPlayer;
             this.showNextPlayerMsg = true;
+            this.waitingForNextPlayer = true;
             setTimeout(() => { this.showNextPlayerMsg = false; }, 1200);
         },
+        continueTurn() {
+            this.waitingForNextPlayer = false;
+        },
         passen() {
-            // Spieler kann passen, wenn er nach Ziehen nicht legen kann/will
-            if (this.hasDrawn) {
+            if (this.hasDrawn && !this.waitingForNextPlayer) {
                 this.hasDrawn = false;
                 this.nextPlayer();
             }
