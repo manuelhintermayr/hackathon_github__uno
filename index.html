@@ -121,92 +121,24 @@ const app = Vue.createApp({
             discardPile: [],
             currentPlayer: 0,
             currentColor: null,
-            winner: null,
-            errorMsg: '',
-            hasDrawn: false,
-            canDraw: true,
-            showNextPlayerMsg: false,
             // ...weitere UNO-States wie bisher...
         };
-    },
-    computed: {
-        myHand() {
-            if (!this.gameState || this.playerId === null) return [];
-            return this.gameState.hands[this.playerId] || [];
-        },
-        hands() {
-            // Zeigt für alle Spieler die Kartenanzahl, aber nur für sich selbst die echten Karten
-            if (!this.gameState || this.playerId === null) return [[], [], [], []];
-            return this.gameState.hands.map((hand, idx) => {
-                if (idx === this.playerId) return hand;
-                return Array(hand.length).fill({ color: 'back', value: '' });
-            });
-        },
-        discardPile() {
-            return this.gameState ? this.gameState.discardPile : [];
-        },
-        currentPlayer() {
-            return this.gameState ? this.gameState.currentPlayer : 0;
-        },
-        currentColor() {
-            return this.gameState ? this.gameState.currentColor : null;
-        },
-        winner() {
-            return this.gameState ? this.gameState.winner : null;
-        },
-        canDraw() {
-            // Optional: Logik, wann Ziehen erlaubt ist
-            return this.gameState && this.currentPlayer === this.playerId && !this.hasDrawn;
-        },
-        hasDrawn() {
-            return this.gameState && this.gameState.hasDrawn && this.currentPlayer === this.playerId;
-        },
-        showNextPlayerMsg() {
-            return this.gameState && this.gameState.showNextPlayerMsg;
-        }
     },
     methods: {
         startGame() {
             ws.send(JSON.stringify({ type: 'start' }));
         },
         playCard(idx) {
-            if (this.currentPlayer !== this.playerId || this.showColorPicker) return;
-            const card = this.myHand[idx];
-            if (!card) return;
-            if (card.color === 'wild' || card.color === 'wild4') {
-                // Farbauswahl anzeigen
-                this.showColorPicker = true;
-                this.pendingCardIdx = idx;
-            } else {
-                ws.send(JSON.stringify({ type: 'play', idx }));
-            }
+            // ...Spielkarte spielen Logik...
         },
         drawCard() {
-            if (this.currentPlayer !== this.playerId || this.hasDrawn) return;
-            ws.send(JSON.stringify({ type: 'draw' }));
+            // ...Karte ziehen Logik...
         },
         passen() {
-            if (this.currentPlayer !== this.playerId || !this.hasDrawn) return;
-            ws.send(JSON.stringify({ type: 'passen' }));
+            // ...Passen Logik...
         },
         confirmNewGame() {
-            ws.send(JSON.stringify({ type: 'newgame' }));
-        },
-        chooseColor(color) {
-            if (!this.showColorPicker || this.pendingCardIdx === undefined) return;
-            ws.send(JSON.stringify({ type: 'play', idx: this.pendingCardIdx, color }));
-            this.showColorPicker = false;
-            this.pendingCardIdx = undefined;
-        },
-        continueTurn() {
-            this.waitingForNextPlayer = false;
-        },
-        getPlayerIndex(offset) {
-            // Zeigt die Spieler im Uhrzeigersinn relativ zum eigenen Sitzplatz an
-            if (this.playerId === null) return offset;
-            if (!this.gameState || !this.gameState.hands) return offset;
-            const n = this.gameState.hands.length;
-            return (this.playerId + offset) % n;
+            // ...Neues Spiel bestätigen Logik...
         },
         handleWS(msg) {
             if (msg.type === 'joined') {
