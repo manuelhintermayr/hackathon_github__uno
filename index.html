@@ -82,9 +82,13 @@
                             <div class="card back">UNO</div>
                         </div>
                     </div>
+                    <div class="action-row" v-if="currentPlayer===0 || currentPlayer===1 || currentPlayer===2 || currentPlayer===3">
+                        <button @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
+                        <button v-if="hasDrawn" @click="passen">Passen</button>
+                        <button @click="confirmNewGame" style="margin-left:20px;">Neues Spiel</button>
+                    </div>
                     <div v-if="winner !== null" style="margin-top:30px; font-size:2em; color:#ffd600;">Spieler {{winner+1}} hat gewonnen!</div>
                     <div v-if="errorMsg" style="color:#ff5252; font-weight:bold; margin-bottom:10px;">{{ errorMsg }}</div>
-                    <button @click="startGame" style="margin-top:10px;">Neues Spiel</button>
                 </div>
                 <div class="side-player">
                     <div class="player-label" :class="{active: currentPlayer===3}">Spieler 4 <span v-if="currentPlayer===3">(am Zug)</span></div>
@@ -109,15 +113,12 @@
                     </div>
                 </div>
             </div>
-            <div class="action-row" v-if="currentPlayer===0 || currentPlayer===1 || currentPlayer===2 || currentPlayer===3">
-                <button v-if="currentPlayer===0 || currentPlayer===1 || currentPlayer===2 || currentPlayer===3" @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
-                <div v-if="hasDrawn" style="margin-bottom:10px;display:inline-block;">
-                    <button @click="passen">Passen</button>
-                </div>
-            </div>
         </div>
     </div>
     <script src="uno.js"></script>
+    <script>
+    // ...existing code...
+    </script>
 </body>
 
 </html>

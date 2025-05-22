@@ -214,6 +214,11 @@ createApp({
             }
             return card.color === topColor || card.value === top.value;
         },
+        confirmNewGame() {
+            if (confirm('Bist du sicher, dass du ein neues Spiel starten möchtest?')) {
+                this.startGame();
+            }
+        },
     },
     mounted() {
         this.startGame();
