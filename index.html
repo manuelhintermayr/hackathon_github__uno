@@ -6,11 +6,37 @@
     <title>UNO Spiel – 2 Spieler</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <link rel="stylesheet" href="uno.css">
+    <style>
+.color-picker-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.color-picker-modal {
+    background: #222;
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 32px #000a;
+    text-align: center;
+    color: #fff;
+    font-size: 1.3em;
+}
+</style>
 </head>
 
 <body>
     <div id="app">
-        <div class="uno-table">
+        <div v-if="showColorPicker" class="color-picker-overlay">
+            <div class="color-picker-modal">
+                <div>Wähle eine Farbe:</div>
+                <button v-for="color in ['red','green','blue','yellow']" :key="color" :class="['card', color]" style="margin:10px;min-width:60px;min-height:90px;font-size:1.5em;" @click="chooseColor(color)"></button>
+            </div>
+        </div>
+        <div class="uno-table" :style="showColorPicker ? 'filter:blur(2px);pointer-events:none;' : ''">
             <div class="stacks">
                 <div>
                     <div>Ablagestapel</div>

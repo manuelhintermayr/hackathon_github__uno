@@ -10,6 +10,8 @@ createApp({
             canDraw: true,
             errorMsg: '',
             hasDrawn: false,
+            showColorPicker: false,
+            pendingWild: null, // { idx, type: 'W' | '+4' }
         };
     },
     methods: {
@@ -65,63 +67,87 @@ createApp({
             const hand = this.hands[this.currentPlayer];
             const card = hand[idx];
             const top = this.discardPile[this.discardPile.length - 1];
-            // Legeregeln für Wild-Karten
             const isPlayable = (
                 card.color === top.color ||
                 card.value === top.value ||
                 card.color === 'wild'
             );
             if (isPlayable) {
-                this.discardPile.push(card);
-                hand.splice(idx, 1);
-                // Wild-Karten: Farbe wählen (hier: zufällig, UI-Auswahl kann später ergänzt werden)
-                if (card.color === 'wild' && card.value === 'W') {
-                    const colors = ['red', 'green', 'blue', 'yellow'];
-                    const chosen = colors[Math.floor(Math.random() * 4)];
-                    this.discardPile[this.discardPile.length - 1].color = chosen;
+                // Wild-Karten: Farbauswahl anzeigen
+                if (card.color === 'wild') {
+                    this.pendingWild = { idx, type: card.value };
+                    this.showColorPicker = true;
+                    return;
                 }
-                if (card.color === 'wild' && card.value === '+4') {
-                    const colors = ['red', 'green', 'blue', 'yellow'];
-                    const chosen = colors[Math.floor(Math.random() * 4)];
-                    this.discardPile[this.discardPile.length - 1].color = chosen;
-                    // Nächster Spieler zieht 4 Karten und setzt aus
-                    this.nextPlayer();
-                    for (let i = 0; i < 4; i++) {
-                        if (this.deck.length === 0) this.reshuffleDeck();
-                        this.hands[this.currentPlayer].push(this.deck.pop());
-                    }
-                    this.nextPlayer();
-                } else if (card.value === '+2') {
-                    // Nächster Spieler zieht 2 Karten und setzt aus
-                    this.nextPlayer();
-                    for (let i = 0; i < 2; i++) {
-                        if (this.deck.length === 0) this.reshuffleDeck();
-                        this.hands[this.currentPlayer].push(this.deck.pop());
-                    }
-                    this.nextPlayer();
-                } else if (card.value === 'S' || card.value === 'R') {
-                    // Bei 2 Spielern: Skip und Reverse wirken wie Skip
-                    this.nextPlayer();
+                this._playCardEffect(idx, card);
+            } else {
+                this.errorMsg = 'Diese Karte kann nicht gelegt werden!';
+            }
+        },
+        chooseColor(color) {
+            if (!this.pendingWild) return;
+            const hand = this.hands[this.currentPlayer];
+            const idx = this.pendingWild.idx;
+            const card = hand[idx];
+            // Setze die gewählte Farbe auf die Karte
+            const playedCard = { ...card, color };
+            this.discardPile.push(playedCard);
+            hand.splice(idx, 1);
+            this.showColorPicker = false;
+            // Effekte für Wild und +4
+            if (this.pendingWild.type === 'W') {
+                if (hand.length === 0) {
+                    this.winner = this.currentPlayer;
+                    this.pendingWild = null;
+                    return;
+                }
+                if (this.hasDrawn) {
+                    this.hasDrawn = false;
                     this.nextPlayer();
                 } else {
-                    if (hand.length === 0) {
-                        this.winner = this.currentPlayer;
-                        return;
-                    }
-                    // Nach Ziehen: Wenn Karte gelegt wird, Zugwechsel
-                    if (this.hasDrawn) {
-                        this.hasDrawn = false;
-                        this.nextPlayer();
-                    } else {
-                        this.nextPlayer();
-                    }
+                    this.nextPlayer();
                 }
+            } else if (this.pendingWild.type === '+4') {
+                this.nextPlayer();
+                for (let i = 0; i < 4; i++) {
+                    if (this.deck.length === 0) this.reshuffleDeck();
+                    this.hands[this.currentPlayer].push(this.deck.pop());
+                }
+                this.nextPlayer();
+            }
+            if (hand.length === 0) {
+                this.winner = this.currentPlayer;
+            }
+            this.pendingWild = null;
+        },
+        _playCardEffect(idx, card) {
+            const hand = this.hands[this.currentPlayer];
+            this.discardPile.push(card);
+            hand.splice(idx, 1);
+            if (card.value === '+2') {
+                this.nextPlayer();
+                for (let i = 0; i < 2; i++) {
+                    if (this.deck.length === 0) this.reshuffleDeck();
+                    this.hands[this.currentPlayer].push(this.deck.pop());
+                }
+                this.nextPlayer();
+            } else if (card.value === 'S' || card.value === 'R') {
+                this.nextPlayer();
+                this.nextPlayer();
+            } else {
                 if (hand.length === 0) {
                     this.winner = this.currentPlayer;
                     return;
                 }
-            } else {
-                this.errorMsg = 'Diese Karte kann nicht gelegt werden!';
+                if (this.hasDrawn) {
+                    this.hasDrawn = false;
+                    this.nextPlayer();
+                } else {
+                    this.nextPlayer();
+                }
+            }
+            if (hand.length === 0) {
+                this.winner = this.currentPlayer;
             }
         },
         reshuffleDeck() {
