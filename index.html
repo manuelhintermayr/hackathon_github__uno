@@ -20,6 +20,10 @@
                 </div>
             </div>
         </div>
+        <div class="uno-action-buttons">
+            <button v-if="getPlayerIndex(0)===currentPlayer" @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
+            <button @click="confirmNewGame">Neues Spiel</button>
+        </div>
         <div class="uno-table-modern" :style="showColorPicker ? 'filter:blur(2px);pointer-events:none;' : ''">
             <!-- Obere Hand (Spieler 2) -->
             <div class="player-area top-player">
@@ -76,12 +80,7 @@
                     <span class="player-name">Spieler {{getPlayerIndex(0)+1}}</span>
                     <span class="card-count">{{ hands[getPlayerIndex(0)].length }}</span>
                 </div>
-                <div class="action-row-modern">
-                    <button v-if="getPlayerIndex(0)===currentPlayer" @click="drawCard" :disabled="!canDraw">Karte ziehen
-                    </button>
-                    <button v-if="getPlayerIndex(0)===currentPlayer && hasDrawn" @click="passen">Passen</button>
-                    <button @click="confirmNewGame" style="margin-left:20px;">Neues Spiel</button>
-                </div>
+                <div class="action-row-modern" style="display:none"></div>
                 <div class="hand fan fan-bottom">
                     <div v-for="(card, idx) in hands[getPlayerIndex(0)]" :key="idx" :class="['card', card.color, {playable: canPlayCard(card)}]"
                         @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
