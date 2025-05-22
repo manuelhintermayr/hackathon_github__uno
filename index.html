@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>UNO Spiel – 2 Spieler</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #2e2e2e;
+            color: #fff;
+        }
+
+        .uno-table {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .stacks {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            width: 60px;
+            height: 90px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin: 0 5px;
+            box-shadow: 0 2px 8px #0008;
+            border: 2px solid #fff;
+        }
+
+        .red {
+            background: #e53935;
+            color: #fff;
+        }
+
+        .green {
+            background: #43a047;
+            color: #fff;
+        }
+
+        .blue {
+            background: #1e88e5;
+            color: #fff;
+        }
+
+        .yellow {
+            background: #fbc02d;
+            color: #333;
+        }
+
+        .back {
+            background: #222;
+            color: #fff;
+            border-style: dashed;
+        }
+
+        .hand {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .player-label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .active {
+            color: #ffd600;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: none;
+            background: #444;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background: #888;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="uno-table">
+            <div class="stacks">
+                <div>
+                    <div>Ablagestapel</div>
+                    <div v-if="discardPile.length" :class="['card', discardPile[discardPile.length-1].color]">
+                        {{ discardPile[discardPile.length-1].value }}
+                    </div>
+                    <div v-else class="card back">?</div>
+                </div>
+                <div>
+                    <div>Nachziehstapel</div>
+                    <div class="card back">UNO</div>
+                </div>
+            </div>
+            <div class="player-label" :class="{active: currentPlayer===0}">Spieler 1 <span v-if="currentPlayer===0">(am
+                    Zug)</span></div>
+            <div class="hand" v-if="currentPlayer===0">
+                <div v-for="(card, idx) in hands[0]" :key="idx" :class="['card', card.color]" @click="playCard(idx)"
+                    style="cursor:pointer">
+                    {{ card.value }}
+                </div>
+            </div>
+            <div class="hand" v-else>
+                <div v-for="card in hands[0]" class="card back"></div>
+            </div>
+            <button @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
+            <div v-if="hasDrawn && currentPlayer===0" style="margin-bottom:10px;">
+                <button @click="passen">Passen</button>
+            </div>
+            <hr style="width: 100%; border: 1px solid #444; margin: 30px 0;">
+            <div class="player-label" :class="{active: currentPlayer===1}">Spieler 2 <span v-if="currentPlayer===1">(am
+                    Zug)</span></div>
+            <div class="hand" v-if="currentPlayer===1">
+                <div v-for="(card, idx) in hands[1]" :key="idx" :class="['card', card.color]" @click="playCard(idx)"
+                    style="cursor:pointer">
+                    {{ card.value }}
+                </div>
+            </div>
+            <div class="hand" v-else>
+                <div v-for="card in hands[1]" class="card back"></div>
+            </div>
+            <button @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
+            <div v-if="hasDrawn && currentPlayer===1" style="margin-bottom:10px;">
+                <button @click="passen">Passen</button>
+            </div>
+            <div v-if="winner !== null" style="margin-top:30px; font-size:2em; color:#ffd600;">Spieler {{winner+1}} hat
+                gewonnen!</div>
+            <div v-if="errorMsg" style="color:#ff5252; font-weight:bold; margin-bottom:10px;">{{ errorMsg }}</div>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    deck: [],
+                    discardPile: [],
+                    hands: [[], []],
+                    currentPlayer: 0,
+                    winner: null,
+                    canDraw: true,
+                    errorMsg: '',
+                    hasDrawn: false,
+                };
+            },
+            methods: {
+                makeDeck() {
+                    const colors = ['red', 'green', 'blue', 'yellow'];
+                    let deck = [];
+                    for (let color of colors) {
+                        for (let n = 0; n <= 9; n++) {
+                            deck.push({ color, value: n });
+                            if (n !== 0) deck.push({ color, value: n }); // 2x jede Zahl außer 0
+                        }
+                    }
+                    // Optional: Spezialkarten (ausgelassen für Einfachheit)
+                    return this.shuffle(deck);
+                },
+                shuffle(arr) {
+                    for (let i = arr.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [arr[i], arr[j]] = [arr[j], arr[i]];
+                    }
+                    return arr;
+                },
+                startGame() {
+                    this.deck = this.makeDeck();
+                    this.hands = [[], []];
+                    this.discardPile = [];
+                    this.currentPlayer = 0;
+                    this.winner = null;
+                    this.canDraw = true;
+                    this.errorMsg = '';
+                    this.hasDrawn = false;
+                    for (let i = 0; i < 2; i++) {
+                        for (let j = 0; j < 7; j++) {
+                            this.hands[i].push(this.deck.pop());
+                        }
+                    }
+                    // Erste Karte auf Ablagestapel
+                    this.discardPile.push(this.deck.pop());
+                },
+                playCard(idx) {
+                    if (this.winner !== null) return;
+                    this.errorMsg = '';
+                    const hand = this.hands[this.currentPlayer];
+                    const card = hand[idx];
+                    const top = this.discardPile[this.discardPile.length - 1];
+                    if (card.color === top.color || card.value === top.value) {
+                        this.discardPile.push(card);
+                        hand.splice(idx, 1);
+                        if (hand.length === 0) {
+                            this.winner = this.currentPlayer;
+                            return;
+                        }
+                        // Nach Ziehen: Wenn Karte gelegt wird, Zugwechsel
+                        if (this.hasDrawn) {
+                          this.hasDrawn = false;
+                          this.nextPlayer();
+                        } else {
+                          this.nextPlayer();
+                        }
+                    } else {
+                        this.errorMsg = 'Diese Karte kann nicht gelegt werden!';
+                    }
+                },
+                drawCard() {
+                    if (this.winner !== null) return;
+                    if (!this.canDraw) return;
+                    if (this.hasDrawn) return; // Nur 1x ziehen pro Zug
+                    if (this.deck.length === 0) {
+                        // Mische Ablagestapel zurück
+                        const last = this.discardPile.pop();
+                        this.deck = this.shuffle(this.discardPile);
+                        this.discardPile = [last];
+                    }
+                    this.hands[this.currentPlayer].push(this.deck.pop());
+                    this.canDraw = false;
+                    this.hasDrawn = true;
+                    this.errorMsg = '';
+                    setTimeout(() => { this.canDraw = true; }, 500);
+                },
+                nextPlayer() {
+                    this.hasDrawn = false;
+                    this.errorMsg = '';
+                    this.currentPlayer = 1 - this.currentPlayer;
+                },
+                passen() {
+                  // Spieler kann passen, wenn er nach Ziehen nicht legen kann/will
+                  if (this.hasDrawn) {
+                    this.hasDrawn = false;
+                    this.nextPlayer();
+                  }
+                }
+            },
+            mounted() {
+                this.startGame();
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
