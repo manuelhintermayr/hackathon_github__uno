@@ -14,7 +14,10 @@
         <div v-if="showColorPicker" class="color-picker-overlay">
             <div class="color-picker-modal">
                 <div>Wähle eine Farbe:</div>
-                <button v-for="color in ['red','green','blue','yellow']" :key="color" :class="['card', color]" style="margin:10px;min-width:60px;min-height:90px;font-size:1.5em;" @click="chooseColor(color)"></button>
+                <div style="display:flex; flex-direction:column; gap:18px; align-items:center;">
+                    <button v-for="color in ['red','green','blue','yellow']" :key="color" :class="['card', color]"
+                        @click="chooseColor(color)"></button>
+                </div>
             </div>
         </div>
         <div class="uno-table-modern" :style="showColorPicker ? 'filter:blur(2px);pointer-events:none;' : ''">
@@ -74,15 +77,18 @@
                     <span class="card-count">{{ hands[getPlayerIndex(0)].length }}</span>
                 </div>
                 <div class="action-row-modern">
-                    <button v-if="getPlayerIndex(0)===currentPlayer" @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
+                    <button v-if="getPlayerIndex(0)===currentPlayer" @click="drawCard" :disabled="!canDraw">Karte ziehen
+                    </button>
                     <button v-if="getPlayerIndex(0)===currentPlayer && hasDrawn" @click="passen">Passen</button>
                     <button @click="confirmNewGame" style="margin-left:20px;">Neues Spiel</button>
                 </div>
                 <div class="hand fan fan-bottom">
-                    <div v-for="(card, idx) in hands[getPlayerIndex(0)]" :key="idx" :class="['card', card.color, {playable: canPlayCard(card)}]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
+                    <div v-for="(card, idx) in hands[getPlayerIndex(0)]" :key="idx" :class="['card', card.color, {playable: canPlayCard(card)}]"
+                        @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                 </div>
             </div>
-            <div v-if="showNextPlayerMsg" class="next-player-msg-modern">Spieler {{currentPlayer+1}} ist jetzt am Zug.</div>
+            <div v-if="showNextPlayerMsg" class="next-player-msg-modern">Spieler {{currentPlayer+1}} ist jetzt am Zug.
+            </div>
             <div v-if="winner !== null" class="winner-msg-modern">Spieler {{winner+1}} hat gewonnen!</div>
             <div v-if="errorMsg" class="error-msg-modern">{{ errorMsg }}</div>
         </div>
