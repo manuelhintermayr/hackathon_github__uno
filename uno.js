@@ -4,14 +4,15 @@ createApp({
         return {
             deck: [],
             discardPile: [],
-            hands: [[], []],
+            hands: [[], [], [], []],
             currentPlayer: 0,
             winner: null,
             canDraw: true,
             errorMsg: '',
             hasDrawn: false,
             showColorPicker: false,
-            pendingWild: null, // { idx, type: 'W' | '+4' }
+            pendingWild: null,
+            direction: 1, // 1 = Uhrzeigersinn, -1 = gegen Uhrzeigersinn
         };
     },
     methods: {
@@ -46,14 +47,15 @@ createApp({
         },
         startGame() {
             this.deck = this.makeDeck();
-            this.hands = [[], []];
+            this.hands = [[], [], [], []];
             this.discardPile = [];
             this.currentPlayer = 0;
             this.winner = null;
             this.canDraw = true;
             this.errorMsg = '';
             this.hasDrawn = false;
-            for (let i = 0; i < 2; i++) {
+            this.direction = 1;
+            for (let i = 0; i < 4; i++) {
                 for (let j = 0; j < 7; j++) {
                     this.hands[i].push(this.deck.pop());
                 }
@@ -131,9 +133,15 @@ createApp({
                     this.hands[this.currentPlayer].push(this.deck.pop());
                 }
                 this.nextPlayer();
-            } else if (card.value === 'S' || card.value === 'R') {
-                this.nextPlayer();
-                this.nextPlayer();
+            } else if (card.value === 'S') {
+                this.nextPlayer(true); // skip
+            } else if (card.value === 'R') {
+                this.direction *= -1;
+                if (this.hands.filter(h => h.length > 0).length > 2) {
+                    this.nextPlayer();
+                } else {
+                    this.nextPlayer(true); // Bei 2 Spielern wie Skip
+                }
             } else {
                 if (hand.length === 0) {
                     this.winner = this.currentPlayer;
@@ -168,10 +176,14 @@ createApp({
             this.errorMsg = '';
             setTimeout(() => { this.canDraw = true; }, 500);
         },
-        nextPlayer() {
+        nextPlayer(skip = false) {
             this.hasDrawn = false;
             this.errorMsg = '';
-            this.currentPlayer = 1 - this.currentPlayer;
+            if (skip) {
+                this.currentPlayer = (this.currentPlayer + this.direction * 2 + 4) % 4;
+            } else {
+                this.currentPlayer = (this.currentPlayer + this.direction + 4) % 4;
+            }
         },
         passen() {
             // Spieler kann passen, wenn er nach Ziehen nicht legen kann/will

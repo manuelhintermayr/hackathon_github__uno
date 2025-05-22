@@ -36,54 +36,68 @@
                 <button v-for="color in ['red','green','blue','yellow']" :key="color" :class="['card', color]" style="margin:10px;min-width:60px;min-height:90px;font-size:1.5em;" @click="chooseColor(color)"></button>
             </div>
         </div>
-        <div class="uno-table" :style="showColorPicker ? 'filter:blur(2px);pointer-events:none;' : ''">
-            <div class="stacks">
-                <div>
-                    <div>Ablagestapel</div>
-                    <div v-if="discardPile.length" :class="['card', discardPile[discardPile.length-1].color]">
-                        {{ discardPile[discardPile.length-1].value }}
+        <div class="uno-table-4" :style="showColorPicker ? 'filter:blur(2px);pointer-events:none;' : ''">
+            <div class="uno-row top-row">
+                <div class="player-label" :class="{active: currentPlayer===1}">Spieler 2 <span v-if="currentPlayer===1">(am Zug)</span></div>
+                <div class="hand hand-row" v-if="currentPlayer===1">
+                    <div v-for="(card, idx) in hands[1]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
+                </div>
+                <div class="hand hand-row" v-else>
+                    <div v-for="card in hands[1]" class="card back"></div>
+                </div>
+            </div>
+            <div class="uno-row middle-row">
+                <div class="side-player">
+                    <div class="player-label" :class="{active: currentPlayer===2}">Spieler 3 <span v-if="currentPlayer===2">(am Zug)</span></div>
+                    <div class="hand hand-col" v-if="currentPlayer===2">
+                        <div v-for="(card, idx) in hands[2]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                     </div>
-                    <div v-else class="card back">?</div>
+                    <div class="hand hand-col" v-else>
+                        <div v-for="card in hands[2]" class="card back"></div>
+                    </div>
                 </div>
-                <div>
-                    <div>Nachziehstapel</div>
-                    <div class="card back">UNO</div>
+                <div class="center-stacks">
+                    <div class="stacks">
+                        <div>
+                            <div>Ablagestapel</div>
+                            <div v-if="discardPile.length" :class="['card', discardPile[discardPile.length-1].color]">
+                                {{ discardPile[discardPile.length-1].value }}
+                            </div>
+                            <div v-else class="card back">?</div>
+                        </div>
+                        <div>
+                            <div>Nachziehstapel</div>
+                            <div class="card back">UNO</div>
+                        </div>
+                    </div>
+                    <div v-if="winner !== null" style="margin-top:30px; font-size:2em; color:#ffd600;">Spieler {{winner+1}} hat gewonnen!</div>
+                    <div v-if="errorMsg" style="color:#ff5252; font-weight:bold; margin-bottom:10px;">{{ errorMsg }}</div>
+                </div>
+                <div class="side-player">
+                    <div class="player-label" :class="{active: currentPlayer===3}">Spieler 4 <span v-if="currentPlayer===3">(am Zug)</span></div>
+                    <div class="hand hand-col" v-if="currentPlayer===3">
+                        <div v-for="(card, idx) in hands[3]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
+                    </div>
+                    <div class="hand hand-col" v-else>
+                        <div v-for="card in hands[3]" class="card back"></div>
+                    </div>
                 </div>
             </div>
-            <div class="player-label" :class="{active: currentPlayer===0}">Spieler 1 <span v-if="currentPlayer===0">(am
-                    Zug)</span></div>
-            <div class="hand" v-if="currentPlayer===0">
-                <div v-for="(card, idx) in hands[0]" :key="idx" :class="['card', card.color]" @click="playCard(idx)"
-                    style="cursor:pointer">
-                    {{ card.value }}
+            <div class="uno-row bottom-row">
+                <div class="player-label" :class="{active: currentPlayer===0}">Spieler 1 <span v-if="currentPlayer===0">(am Zug)</span></div>
+                <div class="hand hand-row" v-if="currentPlayer===0">
+                    <div v-for="(card, idx) in hands[0]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
+                </div>
+                <div class="hand hand-row" v-else>
+                    <div v-for="card in hands[0]" class="card back"></div>
                 </div>
             </div>
-            <div class="hand" v-else>
-                <div v-for="card in hands[0]" class="card back"></div>
-            </div>
-            <button @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
-            <div v-if="hasDrawn && currentPlayer===0" style="margin-bottom:10px;">
-                <button @click="passen">Passen</button>
-            </div>
-            <hr style="width: 100%; border: 1px solid #444; margin: 30px 0;">
-            <div class="player-label" :class="{active: currentPlayer===1}">Spieler 2 <span v-if="currentPlayer===1">(am
-                    Zug)</span></div>
-            <div class="hand" v-if="currentPlayer===1">
-                <div v-for="(card, idx) in hands[1]" :key="idx" :class="['card', card.color]" @click="playCard(idx)"
-                    style="cursor:pointer">
-                    {{ card.value }}
+            <div class="action-row">
+                <button @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
+                <div v-if="hasDrawn" style="margin-bottom:10px;display:inline-block;">
+                    <button @click="passen">Passen</button>
                 </div>
             </div>
-            <div class="hand" v-else>
-                <div v-for="card in hands[1]" class="card back"></div>
-            </div>
-            <button @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
-            <div v-if="hasDrawn && currentPlayer===1" style="margin-bottom:10px;">
-                <button @click="passen">Passen</button>
-            </div>
-            <div v-if="winner !== null" style="margin-top:30px; font-size:2em; color:#ffd600;">Spieler {{winner+1}} hat
-                gewonnen!</div>
-            <div v-if="errorMsg" style="color:#ff5252; font-weight:bold; margin-bottom:10px;">{{ errorMsg }}</div>
         </div>
     </div>
     <script src="uno.js"></script>
