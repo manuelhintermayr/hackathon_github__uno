@@ -21,7 +21,7 @@
             </div>
         </div>
         <div class="uno-action-buttons">
-            <button v-if="getPlayerIndex(0)===currentPlayer" @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
+            <button v-if="getPlayerIndex(0)===currentPlayer && !hasDrawn" @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
             <button v-if="getPlayerIndex(0)===currentPlayer && hasDrawn" @click="passen">Passen</button>
             <button @click="confirmNewGame">Neues Spiel</button>
         </div>
@@ -91,6 +91,12 @@
             </div>
             <div v-if="winner !== null" class="winner-msg-modern">Spieler {{winner+1}} hat gewonnen!</div>
             <div v-if="errorMsg" class="error-msg-modern">{{ errorMsg }}</div>
+        </div>
+        <div v-if="waitingForNextPlayer" class="next-player-modal-overlay">
+            <div class="next-player-modal">
+                <div>Spieler {{currentPlayer+1}} ist jetzt am Zug.</div>
+                <button @click="continueTurn">Weiter</button>
+            </div>
         </div>
     </div>
     <script src="uno.js"></script>
