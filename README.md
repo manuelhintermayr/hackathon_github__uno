@@ -1,8 +1,10 @@
-# UNO Game – 2 to 4 Players
+# UNO Game – 4 Player
 
 This project was created as part of the [Microsoft Copilot Hackathon Zurich, May 2025](https://events.xebia.com/microsoft-services/copilot-hackathon-zurich-may-2025). The result was achieved almost entirely with Copilot – except for a single manual CSS height adjustment, no code was written by hand.
 
 This is a modern UNO web app for 4 players, built with Vue.js (CDN) and pure HTML/CSS/JS. The game runs entirely in your browser and requires no server.
+
+![UNO Game Screenshot](game.png)
 
 Try it out [here](https://hackathon.manuelweb.at/uno/).
 
