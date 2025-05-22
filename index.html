@@ -11,13 +11,16 @@
 
 <body>
     <div id="app">
-        <div v-if="showColorPicker" class="color-picker-overlay">
-            <div class="color-picker-modal">
-                <div>Wähle eine Farbe:</div>
-                <button v-for="color in ['red','green','blue','yellow']" :key="color" :class="['card', color]" style="margin:10px;min-width:60px;min-height:90px;font-size:1.5em;" @click="chooseColor(color)"></button>
+        <div v-if="lobbyActive" id="lobby" style="text-align:center; margin-top:40px;">
+            <div id="lobbyInfo">Lobby: {{ lobbySize }} Spieler</div>
+            <div v-if="isHost">
+                <button @click="startGame" :disabled="lobbySize < 2">Spiel starten</button>
             </div>
+            <div style="margin-top:10px; color:#aaa;">Warte auf weitere Spieler... (2-4 Spieler möglich)</div>
+            <div v-if="lobbyError" style="color:#ff5252; font-weight:bold; margin-top:20px;">{{ lobbyError }}</div>
         </div>
-        <div class="uno-table-4" :style="showColorPicker ? 'filter:blur(2px);pointer-events:none;' : ''">
+        <div v-else-if="gameError" style="text-align:center; color:#ff5252; font-weight:bold; margin-top:40px;">{{ gameError }}</div>
+        <div v-else class="uno-table-4" :style="showColorPicker ? 'filter:blur(2px);pointer-events:none;' : ''">
             <div class="uno-row top-row">
                 <div class="player-label" :class="{active: getPlayerIndex(1)===currentPlayer}">
                     Spieler {{getPlayerIndex(1)+1}} <span v-if="getPlayerIndex(1)===currentPlayer">(am Zug)</span>
@@ -98,59 +101,82 @@
     <button @click="continueTurn()" style="margin-top:10px;">Zug starten</button>
 </div>
         </div>
-        <div id="lobby" style="text-align:center; margin-top:40px;">
-  <div id="lobbyInfo">Lobby: ...</div>
-  <button id="startBtn" style="display:none; margin-top:20px;">Spiel starten</button>
-  <div style="margin-top:10px; color:#aaa;">Warte auf weitere Spieler...</div>
-</div>
     </div>
     <script src="uno.js"></script>
     <script>
 let ws;
-let playerId = null;
-let lobbySize = 0;
-let isHost = false;
-let gameStarted = false;
-
-function connectWS() {
-  ws = new WebSocket(location.origin.replace(/^http/, 'ws'));
-  ws.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-    if (msg.type === 'joined') {
-      playerId = msg.playerId;
-      lobbySize = msg.lobbySize;
-      isHost = playerId === 0;
-      document.getElementById('lobbyInfo').innerText = `Lobby: ${lobbySize} Spieler`;
-      if (isHost) document.getElementById('startBtn').style.display = '';
+const app = Vue.createApp({
+    data() {
+        return {
+            lobbyActive: true,
+            lobbySize: 0,
+            isHost: false,
+            lobbyError: '',
+            gameError: '',
+            playerId: null,
+            gameState: null,
+            showColorPicker: false,
+            waitingForNextPlayer: false,
+            hands: [[], [], [], []],
+            discardPile: [],
+            currentPlayer: 0,
+            currentColor: null,
+            // ...weitere UNO-States wie bisher...
+        };
+    },
+    methods: {
+        startGame() {
+            ws.send(JSON.stringify({ type: 'start' }));
+        },
+        playCard(idx) {
+            // ...Spielkarte spielen Logik...
+        },
+        drawCard() {
+            // ...Karte ziehen Logik...
+        },
+        passen() {
+            // ...Passen Logik...
+        },
+        confirmNewGame() {
+            // ...Neues Spiel bestätigen Logik...
+        },
+        handleWS(msg) {
+            if (msg.type === 'joined') {
+                this.playerId = msg.playerId;
+                this.lobbySize = msg.lobbySize;
+                this.isHost = this.playerId === 0;
+                this.lobbyActive = true;
+                this.lobbyError = '';
+            }
+            if (msg.type === 'lobby') {
+                this.lobbySize = msg.players;
+            }
+            if (msg.type === 'start') {
+                this.lobbyActive = false;
+                this.gameState = msg.gameState;
+                this.waitingForNextPlayer = false;
+                this.gameError = '';
+            }
+            if (msg.type === 'update') {
+                this.gameState = msg.gameState;
+                this.waitingForNextPlayer = false;
+            }
+            if (msg.type === 'error') {
+                this.lobbyError = msg.message;
+                this.gameError = msg.message;
+            }
+        }
+    },
+    mounted() {
+        ws = new WebSocket(location.origin.replace(/^http/, 'ws'));
+        ws.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            this.handleWS(msg);
+        };
     }
-    if (msg.type === 'lobby') {
-      lobbySize = msg.players;
-      document.getElementById('lobbyInfo').innerText = `Lobby: ${lobbySize} Spieler`;
-    }
-    if (msg.type === 'start') {
-      gameStarted = true;
-      document.getElementById('lobby').style.display = 'none';
-      // TODO: Spiel-UI initialisieren mit msg.gameState
-    }
-    if (msg.type === 'update') {
-      // TODO: Spiel-UI aktualisieren mit msg.gameState
-    }
-    if (msg.type === 'error') {
-      alert(msg.message);
-    }
-  };
-}
-window.onload = function() {
-  if (!window.WebSocket) {
-    alert('WebSocket wird nicht unterstützt!');
-    return;
-  }
-  document.getElementById('startBtn').onclick = function() {
-    ws.send(JSON.stringify({ type: 'start' }));
-  };
-  connectWS();
-};
-    </script>
+});
+app.mount('#app');
+</script>
 </body>
 
 </html>
