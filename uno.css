@@ -20,6 +20,15 @@ body {
     justify-content: space-between;
 }
 
+.uno-table-modern {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(ellipse at center, #ff3c00 0%, #2d2d2d 100%);
+    overflow: hidden;
+    min-height: 600px;
+}
+
 .stacks {
     display: flex;
     gap: 40px;
@@ -29,42 +38,125 @@ body {
 .card {
     width: 60px;
     height: 90px;
-    border-radius: 10px;
+    border-radius: 12px;
+    margin: 0 -18px;
+    box-shadow: 0 4px 16px #0007;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 2em;
     font-weight: bold;
-    margin: 0 5px;
-    box-shadow: 0 2px 8px #0008;
-    border: 2px solid #fff;
-}
-
-.red {
-    background: #e53935;
     color: #fff;
-}
-
-.green {
-    background: #43a047;
-    color: #fff;
-}
-
-.blue {
-    background: #1e88e5;
-    color: #fff;
-}
-
-.yellow {
-    background: #fbc02d;
-    color: #333;
-}
-
-.back {
     background: #222;
-    color: #fff;
-    border-style: dashed;
+    border: 3px solid #fff;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+    z-index: 1;
+    cursor: pointer;
+    user-select: none;
 }
+
+.card.playable { box-shadow: 0 0 16px 4px #ffd600, 0 4px 16px #0007; border-color: #ffd600; }
+.card.back { background: #111; color: #ffd600; border: 3px solid #ffd600; }
+.card.uno-logo::after {
+    content: "UNO";
+    font-family: Arial Black, Arial, sans-serif;
+    font-size: 1.1em;
+    color: #ffd600;
+    letter-spacing: 2px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%) rotate(-18deg);
+    opacity: 0.85;
+    pointer-events: none;
+}
+.card.red { background: linear-gradient(135deg, #ff5252 60%, #b71c1c 100%); }
+.card.green { background: linear-gradient(135deg, #43a047 60%, #1b5e20 100%); }
+.card.blue { background: linear-gradient(135deg, #1976d2 60%, #0d47a1 100%); }
+.card.yellow { background: linear-gradient(135deg, #ffd600 60%, #ffb300 100%); color: #333; }
+.card.wild, .card.wild4 {
+    background: repeating-linear-gradient(135deg, #fff 0 20px, #222 20px 40px);
+    color: #222;
+}
+
+.stacks-3d-modern {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    display: flex;
+    gap: 80px;
+    z-index: 10;
+}
+.stack-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+}
+.stack-label {
+    font-size: 1.1em;
+    color: #fff;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 6px #000a;
+}
+.card-stack {
+    width: 90px;
+    height: 130px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px #0007, 0 2px 8px #0005;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2em;
+    font-weight: bold;
+    margin-bottom: 6px;
+    position: relative;
+    background: linear-gradient(145deg, #fff 60%, #e0e0e0 100%);
+    border: 3px solid #fff;
+    transition: transform 0.15s;
+}
+.card-stack.discard-stack {
+    transform: rotate(-8deg) scale(1.08);
+    z-index: 2;
+}
+.card-stack.draw-stack {
+    transform: rotate(6deg) scale(1.04);
+    z-index: 1;
+}
+.card-stack.back {
+    background: linear-gradient(135deg, #222 60%, #444 100%);
+    color: #ffd600;
+    letter-spacing: 2px;
+    border: 3px solid #ffd600;
+}
+.card-stack.red { background: linear-gradient(135deg, #ff5252 60%, #b71c1c 100%); color: #fff; }
+.card-stack.green { background: linear-gradient(135deg, #43a047 60%, #1b5e20 100%); color: #fff; }
+.card-stack.blue { background: linear-gradient(135deg, #1976d2 60%, #0d47a1 100%); color: #fff; }
+.card-stack.yellow { background: linear-gradient(135deg, #ffd600 60%, #ffb300 100%); color: #333; }
+.card-stack.wild, .card-stack.wild4 {
+    background: repeating-linear-gradient(135deg, #fff 0 20px, #222 20px 40px);
+    color: #222;
+}
+.card-value {
+    font-size: 2.1em;
+    font-weight: bold;
+    text-shadow: 0 2px 8px #000a;
+}
+
+.player-area {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+}
+.top-player { top: 2%; left: 0; right: 0; }
+.left-player { left: 2%; top: 25%; width: 120px; align-items: flex-start; }
+.right-player { right: 2%; top: 25%; width: 120px; align-items: flex-end; }
+.bottom-player { bottom: 2%; left: 0; right: 0; }
 
 .hand {
     display: flex;
@@ -72,76 +164,80 @@ body {
     margin: 20px 0;
 }
 
+.hand.fan {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin: 0 auto;
+    pointer-events: auto;
+}
+.fan-bottom .card { transform: rotateZ(var(--fan-angle, 0deg)) translateY(0); }
+.fan-top .card { transform: rotateZ(var(--fan-angle, 0deg)) translateY(-10px) scale(0.8); }
+.fan-left .card { transform: rotateZ(-90deg) translateX(-10px) scale(0.8); }
+.fan-right .card { transform: rotateZ(90deg) translateX(10px) scale(0.8); }
+
 .player-label {
     margin-bottom: 5px;
     font-weight: bold;
 }
 
-.active {
+.player-label-modern {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1em;
+    color: #fff;
+    margin-bottom: 2px;
+    text-shadow: 0 2px 6px #000a;
+    font-weight: bold;
+    background: rgba(0,0,0,0.25);
+    border-radius: 8px;
+    padding: 2px 10px;
+    box-shadow: 0 2px 8px #0003;
+    border: 2px solid transparent;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.player-label-modern.active {
+    border: 2px solid #ffd600;
+    box-shadow: 0 0 16px 2px #ffd60099, 0 2px 8px #0003;
     color: #ffd600;
 }
 
-button {
-    margin: 10px;
-    padding: 10px 20px;
+.avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #333;
+    display: inline-block;
+    margin-right: 4px;
+    box-shadow: 0 2px 8px #0007;
+}
+
+.player-name {
     font-size: 1em;
-    border-radius: 5px;
-    border: none;
-    background: #444;
-    color: #fff;
-    cursor: pointer;
+    font-weight: bold;
+    margin-right: 4px;
 }
 
-button:disabled {
-    background: #888;
-    cursor: not-allowed;
-}
-
-.uno-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.top-row, .bottom-row {
-    flex-direction: column;
-    margin: 10px 0;
-}
-
-.middle-row {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: stretch;
-}
-
-.side-player {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 120px;
-}
-
-.center-stacks {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-}
-
-.hand-row {
-    flex-direction: row;
-    justify-content: center;
-}
-
-.hand-col {
-    flex-direction: column;
-    align-items: center;
+.card-count {
+    font-size: 1.1em;
+    color: #ffd600;
+    margin-left: 2px;
+    font-weight: bold;
+    text-shadow: 0 2px 6px #000a;
 }
 
 .action-row {
     display: flex;
     justify-content: center;
     margin: 10px 0 30px 0;
+}
+
+.action-row-modern {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 10px 0 0 0;
 }
 
 .next-player-msg {
@@ -157,6 +253,51 @@ button:disabled {
     z-index: 1100;
 }
 
+.next-player-msg-modern {
+    position: absolute;
+    left: 50%;
+    top: 60%;
+    transform: translate(-50%,0);
+    background: #ffd600;
+    color: #222;
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 12px 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px #0007;
+    z-index: 100;
+}
+
+.winner-msg-modern {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%,0);
+    background: #43a047;
+    color: #fff;
+    font-size: 2em;
+    font-weight: bold;
+    padding: 16px 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px #0007;
+    z-index: 100;
+}
+
+.error-msg-modern {
+    position: absolute;
+    left: 50%;
+    top: 70%;
+    transform: translate(-50%,0);
+    background: #ff5252;
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 10px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px #0007;
+    z-index: 100;
+}
+
 @media (max-width: 1200px) {
     .uno-table-4 { font-size: 0.7em; }
     .side-player { min-width: 40px; }
@@ -166,6 +307,10 @@ button:disabled {
 @media (max-width: 900px) {
     .uno-table-4 { font-size: 0.8em; }
     .side-player { min-width: 60px; }
+    .uno-table-modern { min-height: 400px; }
+    .card, .card-stack { width: 38px; height: 56px; font-size: 1em; }
+    .stack-container { min-width: 60px; }
+    .player-label-modern { font-size: 0.9em; }
 }
 @media (max-width: 800px) {
     .uno-table-4 { font-size: 0.55em; }
