@@ -58,6 +58,13 @@ body {
 
 .card.playable { box-shadow: 0 0 16px 4px #ffd600, 0 4px 16px #0007; border-color: #ffd600; }
 .card.back { background: #111; color: #ffd600; border: 3px solid #ffd600; }
+.card.back.uno-logo {
+    width: 90px;
+    height: 130px;
+    min-width: 90px;
+    min-height: 130px;
+    box-sizing: border-box;
+}
 .card.uno-logo::after {
     content: "UNO";
     font-family: Arial Black, Arial, sans-serif;
