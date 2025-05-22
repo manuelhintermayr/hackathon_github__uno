@@ -4,7 +4,7 @@ This project was created as part of the [Microsoft Copilot Hackathon Zurich, May
 
 This is a modern UNO web app for 4 players, built with Vue.js (CDN) and pure HTML/CSS/JS. The game runs entirely in your browser and requires no server.
 
-Try it out [here]().
+Try it out [here](https://hackathon.manuelweb.at/uno/).
 
 ## Features
 - Classic UNO card game rules
