@@ -12,8 +12,10 @@ createApp({
             hasDrawn: false,
             showColorPicker: false,
             pendingWild: null,
-            direction: 1, // 1 = Uhrzeigersinn, -1 = gegen Uhrzeigersinn
-            currentColor: null, // für Wild/+4
+            direction: 1,
+            currentColor: null,
+            showNextPlayerMsg: false,
+            playerPerspective: 0, // 0 = Spieler 1, 1 = Spieler 2, ...
         };
     },
     methods: {
@@ -51,6 +53,7 @@ createApp({
             this.hands = [[], [], [], []];
             this.discardPile = [];
             this.currentPlayer = 0;
+            this.playerPerspective = 0;
             this.winner = null;
             this.canDraw = true;
             this.errorMsg = '';
@@ -65,6 +68,7 @@ createApp({
             this.discardPile.push(this.deck.pop());
             // Setze Startfarbe
             this.currentColor = this.discardPile[0].color;
+            this.showNextPlayerMsg = false;
         },
         playCard(idx) {
             if (this.winner !== null) return;
@@ -192,6 +196,9 @@ createApp({
             } else {
                 this.currentPlayer = (this.currentPlayer + this.direction + 4) % 4;
             }
+            this.playerPerspective = this.currentPlayer;
+            this.showNextPlayerMsg = true;
+            setTimeout(() => { this.showNextPlayerMsg = false; }, 1200);
         },
         passen() {
             // Spieler kann passen, wenn er nach Ziehen nicht legen kann/will
@@ -218,6 +225,10 @@ createApp({
             if (confirm('Bist du sicher, dass du ein neues Spiel starten möchtest?')) {
                 this.startGame();
             }
+        },
+        getPlayerIndex(offset) {
+            // Zeigt die Spieler so an, dass der aktuelle Spieler immer unten ist
+            return (this.currentPlayer + offset) % 4;
         },
     },
     mounted() {
