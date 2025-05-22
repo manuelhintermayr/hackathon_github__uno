@@ -25,6 +25,13 @@
     color: #fff;
     font-size: 1.3em;
 }
+.current-color-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-top: 10px;
+}
 </style>
 </head>
 
@@ -43,7 +50,9 @@
                     <div v-for="(card, idx) in hands[1]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                 </div>
                 <div class="hand hand-row" v-else>
-                    <div v-for="card in hands[1]" class="card back"></div>
+                    <div v-for="card in hands[1]" class="card back" style="position:relative;">
+                        <span class="card-count">{{ hands[1].length }}</span>
+                    </div>
                 </div>
             </div>
             <div class="uno-row middle-row">
@@ -53,7 +62,9 @@
                         <div v-for="(card, idx) in hands[2]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                     </div>
                     <div class="hand hand-col" v-else>
-                        <div v-for="card in hands[2]" class="card back"></div>
+                        <div v-for="card in hands[2]" class="card back" style="position:relative;">
+                            <span class="card-count">{{ hands[2].length }}</span>
+                        </div>
                     </div>
                 </div>
                 <div class="center-stacks">
@@ -64,6 +75,7 @@
                                 {{ discardPile[discardPile.length-1].value }}
                             </div>
                             <div v-else class="card back">?</div>
+                            <div v-if="currentColor" :class="['current-color-indicator', currentColor]" title="Aktuelle Farbe"></div>
                         </div>
                         <div>
                             <div>Nachziehstapel</div>
@@ -72,6 +84,7 @@
                     </div>
                     <div v-if="winner !== null" style="margin-top:30px; font-size:2em; color:#ffd600;">Spieler {{winner+1}} hat gewonnen!</div>
                     <div v-if="errorMsg" style="color:#ff5252; font-weight:bold; margin-bottom:10px;">{{ errorMsg }}</div>
+                    <button @click="startGame" style="margin-top:10px;">Neues Spiel</button>
                 </div>
                 <div class="side-player">
                     <div class="player-label" :class="{active: currentPlayer===3}">Spieler 4 <span v-if="currentPlayer===3">(am Zug)</span></div>
@@ -79,7 +92,9 @@
                         <div v-for="(card, idx) in hands[3]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                     </div>
                     <div class="hand hand-col" v-else>
-                        <div v-for="card in hands[3]" class="card back"></div>
+                        <div v-for="card in hands[3]" class="card back" style="position:relative;">
+                            <span class="card-count">{{ hands[3].length }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -89,11 +104,13 @@
                     <div v-for="(card, idx) in hands[0]" :key="idx" :class="['card', card.color]" @click="playCard(idx)" style="cursor:pointer">{{ card.value }}</div>
                 </div>
                 <div class="hand hand-row" v-else>
-                    <div v-for="card in hands[0]" class="card back"></div>
+                    <div v-for="card in hands[0]" class="card back" style="position:relative;">
+                        <span class="card-count">{{ hands[0].length }}</span>
+                    </div>
                 </div>
             </div>
-            <div class="action-row">
-                <button @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
+            <div class="action-row" v-if="currentPlayer===0 || currentPlayer===1 || currentPlayer===2 || currentPlayer===3">
+                <button v-if="currentPlayer===0 || currentPlayer===1 || currentPlayer===2 || currentPlayer===3" @click="drawCard" :disabled="!canDraw">Karte ziehen</button>
                 <div v-if="hasDrawn" style="margin-bottom:10px;display:inline-block;">
                     <button @click="passen">Passen</button>
                 </div>

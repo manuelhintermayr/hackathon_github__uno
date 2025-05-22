@@ -13,6 +13,7 @@ createApp({
             showColorPicker: false,
             pendingWild: null,
             direction: 1, // 1 = Uhrzeigersinn, -1 = gegen Uhrzeigersinn
+            currentColor: null, // für Wild/+4
         };
     },
     methods: {
@@ -55,13 +56,15 @@ createApp({
             this.errorMsg = '';
             this.hasDrawn = false;
             this.direction = 1;
+            this.currentColor = null;
             for (let i = 0; i < 4; i++) {
                 for (let j = 0; j < 7; j++) {
                     this.hands[i].push(this.deck.pop());
                 }
             }
-            // Erste Karte auf Ablagestapel
             this.discardPile.push(this.deck.pop());
+            // Setze Startfarbe
+            this.currentColor = this.discardPile[0].color;
         },
         playCard(idx) {
             if (this.winner !== null) return;
@@ -69,8 +72,10 @@ createApp({
             const hand = this.hands[this.currentPlayer];
             const card = hand[idx];
             const top = this.discardPile[this.discardPile.length - 1];
+            // Für Wild: aktuelle Farbe vergleichen
+            const topColor = this.currentColor || top.color;
             const isPlayable = (
-                card.color === top.color ||
+                card.color === topColor ||
                 card.value === top.value ||
                 card.color === 'wild'
             );
@@ -82,6 +87,7 @@ createApp({
                     return;
                 }
                 this._playCardEffect(idx, card);
+                this.currentColor = card.color;
             } else {
                 this.errorMsg = 'Diese Karte kann nicht gelegt werden!';
             }
@@ -96,6 +102,7 @@ createApp({
             this.discardPile.push(playedCard);
             hand.splice(idx, 1);
             this.showColorPicker = false;
+            this.currentColor = color;
             // Effekte für Wild und +4
             if (this.pendingWild.type === 'W') {
                 if (hand.length === 0) {
@@ -126,6 +133,7 @@ createApp({
             const hand = this.hands[this.currentPlayer];
             this.discardPile.push(card);
             hand.splice(idx, 1);
+            this.currentColor = card.color;
             if (card.value === '+2') {
                 this.nextPlayer();
                 for (let i = 0; i < 2; i++) {
@@ -191,7 +199,21 @@ createApp({
                 this.hasDrawn = false;
                 this.nextPlayer();
             }
-        }
+        },
+        // Hilfsmethode: Prüft, ob eine Karte gelegt werden darf (UNO-Regel +4)
+        canPlayCard(card) {
+            const top = this.discardPile[this.discardPile.length - 1];
+            const topColor = this.currentColor || top.color;
+            if (card.color === 'wild') {
+                if (card.value === '+4') {
+                    // +4 darf nur gelegt werden, wenn keine andere Karte der aktuellen Farbe vorhanden ist
+                    const hand = this.hands[this.currentPlayer];
+                    return !hand.some(c => c.color === topColor && c.color !== 'wild');
+                }
+                return true;
+            }
+            return card.color === topColor || card.value === top.value;
+        },
     },
     mounted() {
         this.startGame();

@@ -148,3 +148,33 @@ button:disabled {
     .uno-table-4 { font-size: 0.8em; }
     .side-player { min-width: 60px; }
 }
+
+.player-label.active {
+    color: #ffd600;
+    font-weight: bold;
+    text-shadow: 0 0 8px #ffd60099;
+}
+
+.card.back {
+    position: relative;
+}
+
+.card-count {
+    position: absolute;
+    bottom: 2px;
+    right: 6px;
+    font-size: 0.8em;
+    color: #ffd600;
+    background: #222a;
+    border-radius: 6px;
+    padding: 0 4px;
+}
+
+.current-color-indicator {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    margin: 8px auto 0 auto;
+    box-shadow: 0 0 8px #000a;
+}
