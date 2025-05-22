@@ -98,10 +98,58 @@
     <button @click="continueTurn()" style="margin-top:10px;">Zug starten</button>
 </div>
         </div>
+        <div id="lobby" style="text-align:center; margin-top:40px;">
+  <div id="lobbyInfo">Lobby: ...</div>
+  <button id="startBtn" style="display:none; margin-top:20px;">Spiel starten</button>
+  <div style="margin-top:10px; color:#aaa;">Warte auf weitere Spieler...</div>
+</div>
     </div>
     <script src="uno.js"></script>
     <script>
-    // ...existing code...
+let ws;
+let playerId = null;
+let lobbySize = 0;
+let isHost = false;
+let gameStarted = false;
+
+function connectWS() {
+  ws = new WebSocket(location.origin.replace(/^http/, 'ws'));
+  ws.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    if (msg.type === 'joined') {
+      playerId = msg.playerId;
+      lobbySize = msg.lobbySize;
+      isHost = playerId === 0;
+      document.getElementById('lobbyInfo').innerText = `Lobby: ${lobbySize} Spieler`;
+      if (isHost) document.getElementById('startBtn').style.display = '';
+    }
+    if (msg.type === 'lobby') {
+      lobbySize = msg.players;
+      document.getElementById('lobbyInfo').innerText = `Lobby: ${lobbySize} Spieler`;
+    }
+    if (msg.type === 'start') {
+      gameStarted = true;
+      document.getElementById('lobby').style.display = 'none';
+      // TODO: Spiel-UI initialisieren mit msg.gameState
+    }
+    if (msg.type === 'update') {
+      // TODO: Spiel-UI aktualisieren mit msg.gameState
+    }
+    if (msg.type === 'error') {
+      alert(msg.message);
+    }
+  };
+}
+window.onload = function() {
+  if (!window.WebSocket) {
+    alert('WebSocket wird nicht unterstützt!');
+    return;
+  }
+  document.getElementById('startBtn').onclick = function() {
+    ws.send(JSON.stringify({ type: 'start' }));
+  };
+  connectWS();
+};
     </script>
 </body>
 
