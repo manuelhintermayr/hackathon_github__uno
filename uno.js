@@ -66,9 +66,14 @@ createApp({
                     this.hands[i].push(this.deck.pop());
                 }
             }
-            this.discardPile.push(this.deck.pop());
-            // Setze Startfarbe
-            this.currentColor = this.discardPile[0].color;
+            // Ziehe die erste Karte für den Ablagestapel, bis es eine Zahlenkarte ist
+            let firstCard;
+            do {
+                if (this.deck.length === 0) this.deck = this.makeDeck();
+                firstCard = this.deck.pop();
+            } while (typeof firstCard.value !== 'number');
+            this.discardPile.push(firstCard);
+            this.currentColor = firstCard.color;
             this.showNextPlayerMsg = false;
             this.waitingForNextPlayer = false;
         },
